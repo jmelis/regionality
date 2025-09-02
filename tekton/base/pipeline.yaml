@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: provision-eks-cluster
+spec:
+  params:
+  - name: cluster-name
+    type: string
+  - name: target-role-arn
+    type: string
+  - name: cluster-config-path
+    type: string
+  tasks:
+  - name: assume-role
+    taskRef:
+      name: assume-role
+    params:
+    - name: target-role-arn
+      value: $(params.target-role-arn)
+  - name: provision-cluster
+    taskRef:
+      name: provision-cluster
+    runAfter:
+    - assume-role
+    params:
+    - name: cluster-name
+      value: $(params.cluster-name)
+    - name: cluster-config-path
+      value: $(params.cluster-config-path)
+    - name: access-key-id
+      value: $(tasks.assume-role.results.access-key-id)
+    - name: secret-access-key
+      value: $(tasks.assume-role.results.secret-access-key)
+    - name: session-token
+      value: $(tasks.assume-role.results.session-token)

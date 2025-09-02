@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/regionality
+    repoURL: https://github.com/jmelis/regionality
     targetRevision: HEAD
     path: clusters/frm-poc/aws-cluster-01
   destination:

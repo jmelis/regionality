@@ -1,62 +1,46 @@
-# Sector defaults
+# defaults for all clusters
+defaults: {}
+
+# defaults per sector
 sectors:
   canary:
-    sector: "canary"
     deployment_strategy: "blue-green"
     monitoring_level: "verbose"
-    rollback_enabled: "true"
   prod-01:
-    sector: "prod-01"
-    deployment_strategy: "rolling"
     monitoring_level: "standard"
-    backup_enabled: "true"
   prod-02:
-    sector: "prod-02"
-    deployment_strategy: "rolling"
     monitoring_level: "standard"
-    disaster_recovery: "enabled"
 
-# Regional defaults with sector assignment
+# defaults per region and mapping to sector
 regions:
   us-east-1:
-    sector: prod-02          # Region belongs to prod-02 sector
+    sector: prod-02
     region: "us-east-1"
     timezone: "America/New_York"
-    compliance: "SOC2"
-    data_residency: "US"
   us-east-2:
-    sector: prod-01          # Region belongs to prod-01 sector
+    sector: prod-01
     region: "us-east-2"
     timezone: "America/New_York"
-    compliance: "SOC2"
-    data_residency: "US"
   us-west-2:
-    sector: prod-01          # Region belongs to prod-01 sector
+    sector: prod-01
     region: "us-west-2"
     timezone: "America/Los_Angeles"
-    compliance: "SOC2"
-    data_residency: "US"
   eu-west-1:
-    sector: canary           # Region belongs to canary sector
+    sector: canary
     region: "eu-west-1"
     timezone: "Europe/London"
-    compliance: "GDPR"
-    data_residency: "EU"
 
-# Cluster configurations (no sector needed, inherited from region)
+# clusters with their data
 clusters:
 - cluster_name: cluster-01
-  region: eu-west-1        # This will inherit canary sector
+  region: eu-west-1
   data:
-    cluster_key: abc
-    node_count: "3"
+    cluster_key: c01
 - cluster_name: cluster-02
-  region: eu-west-1        # This will inherit canary sector
+  region: eu-west-1
   data:
-    cluster_key: def
-    node_count: "5"
-- cluster_name: cluster-07
-  region: us-east-1        # This will inherit prod-02 sector
+    cluster_key: c02
+- cluster_name: cluster-03
+  region: us-east-1
   data:
-    cluster_key: ghi
-    node_count: "10"
+    cluster_key: c03

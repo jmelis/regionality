@@ -1,0 +1,18 @@
+{{- range .Values.clusters }}
+{{- $regionConfig := index $.Values.regions .region }}
+{{- $sectorDefaults := index $.Values.sectors $regionConfig.sector }}
+{{- $mergedData := merge .data $regionConfig $sectorDefaults }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .cluster_name }}-configmap
+  labels:
+    cluster: {{ .cluster_name }}
+    region: {{ .region }}
+    sector: {{ $regionConfig.sector }}
+data:
+{{- range $key, $value := $mergedData }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}

@@ -1,13 +1,58 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: cluster-provisioning-pipeline
+  name: multi-cloud-provisioning-pipeline
   namespace: default
 spec:
   params:
+  # configmap
   - name: configmap
     type: string
     description: Name of the configmap containing cluster configuration
+
+  # pre-task
+  - name: pre-task-git-url
+    type: string
+    description: Git URL for pre-provision task
+    default: "https://github.com/jmelis/regionality"
+  - name: pre-task-path
+    type: string
+    description: Path to pre-provision task in git repo
+    default: "tasks/aws/pre-task.yaml"
+  - name: pre-task-revision
+    type: string
+    description: Git revision for pre-provision task
+    default: "main"
+
+  # provision-task
+  - name: provision-task-git-url
+    type: string
+    description: Git URL for provision task
+    default: "https://github.com/jmelis/regionality"
+  - name: provision-task-path
+    type: string
+    description: Path to provision task in git repo
+    default: "tasks/aws/provision-task.yaml"
+  - name: provision-task-revision
+    type: string
+    description: Git revision for provision task
+    default: "main"
+
+  # post-task
+  - name: post-task-git-url
+    type: string
+    description: Git URL for post-provision task
+    default: "https://github.com/jmelis/regionality"
+  - name: post-task-path
+    type: string
+    description: Path to post-provision task in git repo
+    default: "tasks/aws/post-task.yaml"
+  - name: post-task-revision
+    type: string
+    description: Git revision for post-provision task
+    default: "main"
+
+  # selectively run tasks
   - name: run-pre
     type: string
     default: "true"
@@ -27,7 +72,14 @@ spec:
       operator: in
       values: ["true"]
     taskRef:
-      name: pre-provision-task
+      resolver: git
+      params:
+      - name: url
+        value: $(params.pre-task-git-url)
+      - name: path
+        value: $(params.pre-task-path)
+      - name: revision
+        value: $(params.pre-task-revision)
     params:
     - name: configmap
       value: $(params.configmap)
@@ -37,7 +89,14 @@ spec:
       operator: in
       values: ["true"]
     taskRef:
-      name: cluster-provision-task
+      resolver: git
+      params:
+      - name: url
+        value: $(params.provision-task-git-url)
+      - name: path
+        value: $(params.provision-task-path)
+      - name: revision
+        value: $(params.provision-task-revision)
     params:
     - name: configmap
       value: $(params.configmap)
@@ -48,7 +107,14 @@ spec:
       operator: in
       values: ["true"]
     taskRef:
-      name: post-provision-task
+      resolver: git
+      params:
+      - name: url
+        value: $(params.post-task-git-url)
+      - name: path
+        value: $(params.post-task-path)
+      - name: revision
+        value: $(params.post-task-revision)
     params:
     - name: configmap
       value: $(params.configmap)

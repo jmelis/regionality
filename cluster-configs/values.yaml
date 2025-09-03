@@ -1,50 +1,73 @@
 # defaults for all clusters
 defaults:
-  data: {}
+  tasks:
+    pre-task-git-url: "https://github.com/jmelis/regionality.git"
+    pre-task-path: "tasks/aws/pre-task.yaml"
+    pre-task-revision: "main"
+    provision-task-git-url: "https://github.com/jmelis/regionality.git"
+    provision-task-path: "tasks/aws/provision-task.yaml"
+    provision-task-revision: "main"
+    post-task-git-url: "https://github.com/jmelis/regionality.git"
+    post-task-path: "tasks/aws/post-task.yaml"
+    post-task-revision: "main"
+    run-pre: "true"
+    run-provision: "true"
+    run-post: "true"
+  data:
 
 # defaults per sector
 sectors:
   canary:
+    tasks: {}
     data:
-      deployment_strategy: "blue-green"
-      monitoring_level: "verbose"
+      DEPLOYMENT_STRATEGY: "blue-green"
+      MONITORING_LEVEL: "verbose"
   prod-01:
+    tasks: {}
     data:
-      monitoring_level: "standard"
+      MONITORING_LEVEL: "standard"
   prod-02:
+    tasks: {}
     data:
-      monitoring_level: "standard"
+      MONITORING_LEVEL: "standard"
 
 # defaults per region and mapping to sector
 regions:
   us-east-1:
     sector: prod-02
+    tasks: {}
     data:
-      timezone: "America/New_York"
+      TIMEZONE: "America/New_York"
   us-east-2:
     sector: prod-01
+    tasks: {}
     data:
-      timezone: "America/New_York"
+      TIMEZONE: "America/New_York"
   us-west-2:
     sector: prod-01
+    tasks: {}
     data:
-      timezone: "America/Los_Angeles"
+      TIMEZONE: "America/Los_Angeles"
   eu-west-1:
     sector: canary
+    tasks: {}
     data:
-      timezone: "Europe/London"
+      TIMEZONE: "Europe/London"
 
 # clusters with their data
 clusters:
-- cluster_name: cluster-01
-  region: eu-west-1
-  data:
-    cluster_key: c01
-- cluster_name: cluster-02
-  region: eu-west-1
-  data:
-    cluster_key: c02
-- cluster_name: cluster-03
-  region: us-east-1
-  data:
-    cluster_key: c03
+  cluster-01:
+    region: eu-west-1
+    tasks: {}
+    data:
+      CLUSTER_KEY: c01
+  cluster-02:
+    region: eu-west-1
+    tasks: {}
+    data:
+      CLUSTER_KEY: c02
+  cluster-03:
+    region: us-east-1
+    tasks: {}
+    data:
+      CLUSTER_KEY: c03

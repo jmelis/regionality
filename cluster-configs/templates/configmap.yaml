@@ -1,12 +1,12 @@
-{{- range .Values.clusters }}
-{{- $regionConfig := index $.Values.regions .region }}
+{{- range $clusterName, $clusterConfig := .Values.clusters }}
+{{- $regionConfig := index $.Values.regions $clusterConfig.region }}
 {{- $sectorDefaults := index $.Values.sectors $regionConfig.sector }}
-{{- $mergedData := merge .data $regionConfig.data $sectorDefaults.data $.Values.defaults.data }}
+{{- $mergedData := merge $clusterConfig.data $regionConfig.data $sectorDefaults.data $.Values.defaults.data }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .cluster_name }}-configmap
+  name: {{ $clusterName }}-configmap
   namespace: default
 data:
 {{- range $key, $value := $mergedData }}

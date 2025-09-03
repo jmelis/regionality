@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: multi-cloud-provisioning-pipeline
+  name: cluster-pipeline
   namespace: default
 spec:
   params:

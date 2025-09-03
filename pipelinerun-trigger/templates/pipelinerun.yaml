@@ -1,0 +1,44 @@
+{{- $clusterConfig := index .Values.clusters .Values.cluster_name }}
+{{- $regionConfig := index .Values.regions $clusterConfig.region }}
+{{- $sectorDefaults := index .Values.sectors $regionConfig.sector }}
+{{- $mergedTasks := merge $clusterConfig.tasks $regionConfig.tasks $sectorDefaults.tasks .Values.defaults.tasks }}
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: "{{ .Values.cluster_name }}-pipelinerun-"
+  namespace: default
+  labels:
+    cluster: "{{ .Values.cluster_name }}"
+    region: "{{ $clusterConfig.region }}"
+    sector: "{{ $regionConfig.sector }}"
+spec:
+  pipelineRef:
+    name: cluster-pipeline
+  params:
+    - name: configmap
+      value: "{{ .Values.cluster_name }}-configmap"
+    - name: pre-task-git-url
+      value: {{ index $mergedTasks "pre-task-git-url" | quote }}
+    - name: pre-task-path
+      value: {{ index $mergedTasks "pre-task-path" | quote }}
+    - name: pre-task-revision
+      value: {{ index $mergedTasks "pre-task-revision" | quote }}
+    - name: provision-task-git-url
+      value: {{ index $mergedTasks "provision-task-git-url" | quote }}
+    - name: provision-task-path
+      value: {{ index $mergedTasks "provision-task-path" | quote }}
+    - name: provision-task-revision
+      value: {{ index $mergedTasks "provision-task-revision" | quote }}
+    - name: post-task-git-url
+      value: {{ index $mergedTasks "post-task-git-url" | quote }}
+    - name: post-task-path
+      value: {{ index $mergedTasks "post-task-path" | quote }}
+    - name: post-task-revision
+      value: {{ index $mergedTasks "post-task-revision" | quote }}
+    - name: run-pre
+      value: {{ index $mergedTasks "run-pre" | quote }}
+    - name: run-provision
+      value: {{ index $mergedTasks "run-provision" | quote }}
+    - name: run-post
+      value: {{ index $mergedTasks "run-post" | quote }}

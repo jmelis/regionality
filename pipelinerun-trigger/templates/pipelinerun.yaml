@@ -42,3 +42,12 @@ spec:
       value: {{ index $mergedTasks "run-provision" | quote }}
     - name: run-post
       value: {{ index $mergedTasks "run-post" | quote }}
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi

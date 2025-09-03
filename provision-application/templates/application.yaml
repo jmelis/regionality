@@ -1,0 +1,24 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: "{{ .Values.cluster_name }}"
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jmelis/regionality.git
+    targetRevision: main
+    path: provision-templates/aws
+    helm:
+      valuesObject:
+        cluster:
+          name: "{{ .Values.cluster_name }}"
+          cluster_version: "{{ .Values.cluster_version }}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

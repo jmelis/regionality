@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cluster-provisioning-pipeline
+  namespace: default
+spec:
+  params:
+  - name: configmap
+    type: string
+    description: Name of the configmap containing cluster configuration
+  - name: run-pre
+    type: string
+    default: "true"
+    description: Whether to run the pre-provision task (true/false)
+  - name: run-provision
+    type: string
+    default: "true"
+    description: Whether to run the provision task (true/false)
+  - name: run-post
+    type: string
+    default: "true"
+    description: Whether to run the post-provision task (true/false)
+  tasks:
+  - name: pre-task
+    when:
+    - input: $(params.run-pre)
+      operator: in
+      values: ["true"]
+    taskRef:
+      name: pre-provision-task
+    params:
+    - name: configmap
+      value: $(params.configmap)
+  - name: provision-task
+    when:
+    - input: $(params.run-provision)
+      operator: in
+      values: ["true"]
+    taskRef:
+      name: cluster-provision-task
+    params:
+    - name: configmap
+      value: $(params.configmap)
+    runAfter: [pre-task]
+  - name: post-task
+    when:
+    - input: $(params.run-post)
+      operator: in
+      values: ["true"]
+    taskRef:
+      name: post-provision-task
+    params:
+    - name: configmap
+      value: $(params.configmap)
+    runAfter: [provision-task]

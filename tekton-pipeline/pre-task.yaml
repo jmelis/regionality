@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pre-provision-task
+  namespace: default
+spec:
+  params:
+  - name: configmap
+    type: string
+    description: Name of the configmap containing cluster configuration
+  volumes:
+  - name: config-volume
+    configMap:
+      name: $(params.configmap)
+  steps:
+  - name: pre-provision
+    image: busybox:latest
+    envFrom:
+    - configMapRef:
+        name: $(params.configmap)
+    script: |
+      #!/bin/sh
+      echo "=== PRE-PROVISION TASK ==="
+      echo "Task: pre"
+      echo "ConfigMap: $(params.configmap)"
+      env | sort
+

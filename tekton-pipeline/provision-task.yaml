@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cluster-provision-task
+  namespace: default
+spec:
+  params:
+  - name: configmap
+    type: string
+    description: Name of the configmap containing cluster configuration
+  volumes:
+  - name: config-volume
+    configMap:
+      name: $(params.configmap)
+  steps:
+  - name: provision
+    image: busybox:latest
+    envFrom:
+    - configMapRef:
+        name: $(params.configmap)
+    script: |
+      #!/bin/sh
+      echo "=== CLUSTER PROVISION TASK ==="
+      echo "Task: provision"
+      echo "ConfigMap: $(params.configmap)"
+      env | sort

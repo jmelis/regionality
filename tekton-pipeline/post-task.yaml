@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: post-provision-task
+  namespace: default
+spec:
+  params:
+  - name: configmap
+    type: string
+    description: Name of the configmap containing cluster configuration
+  volumes:
+  - name: config-volume
+    configMap:
+      name: $(params.configmap)
+  steps:
+  - name: post-provision
+    image: busybox:latest
+    envFrom:
+    - configMapRef:
+        name: $(params.configmap)
+    script: |
+      #!/bin/sh
+      echo "=== POST-PROVISION TASK ==="
+      echo "Task: post"
+      echo "ConfigMap: $(params.configmap)"
+      env | sort

@@ -1,7 +1,7 @@
 {{- range .Values.clusters }}
 {{- $regionConfig := index $.Values.regions .region }}
 {{- $sectorDefaults := index $.Values.sectors $regionConfig.sector }}
-{{- $mergedData := merge .data $regionConfig $sectorDefaults $.Values.defaults }}
+{{- $mergedData := merge .data $regionConfig.data $sectorDefaults.data $.Values.defaults.data }}
 ---
 apiVersion: v1
 kind: ConfigMap

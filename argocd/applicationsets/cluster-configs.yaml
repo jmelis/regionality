@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-configs
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - list:
+          elements:
+          - region: ap-south
+          - region: eu-west
+          - region: us-east
+          - region: us-west
+      - list:
+          elements:
+          - type: regional-cluster
+          - type: regional-access-cluster
+  template:
+    metadata:
+      name: cluster-config-{{type}}-{{region}}
+      labels:
+        app.kubernetes.io/part-of: regionality
+        region: "{{region}}"
+        cluster-type: "{{type}}"
+      annotations:
+        argocd.argoproj.io/instance: cluster-configs
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/jmelis/regionality
+        targetRevision: HEAD
+        path: overlays/clusters/{{type}}-{{region}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: clusters
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

@@ -13,7 +13,7 @@ defaults:
     run-pre: "true"
     run-provision: "true"
     run-post: "true"
-  data:
+  data: {}
 
 # defaults per sector
 sectors:

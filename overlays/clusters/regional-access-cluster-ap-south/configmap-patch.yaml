@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-config
+  namespace: clusters
+data:
+  cluster_name: "regional-access-cluster-ap-south"

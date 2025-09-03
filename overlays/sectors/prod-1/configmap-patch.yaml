@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cluster-config
-  namespace: clusters
-data:
-  commit: "prod-v2.3.0"

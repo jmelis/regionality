@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-configs
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jmelis/regionality
+    targetRevision: HEAD
+    path: cluster-configs
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: clusters
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

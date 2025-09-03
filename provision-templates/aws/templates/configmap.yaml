@@ -4,4 +4,4 @@ kind: ConfigMap
 metadata:
   name: provisioned-cluster-{{ .Values.cluster_name }}
 data:
-  cluster_version: {{ .Values.cluster_version }}
+  cluster_version: "{{ .Values.cluster_version }}"

@@ -12,9 +12,8 @@ spec:
     path: provision-templates/aws
     helm:
       valuesObject:
-        cluster:
-          name: "{{ .Values.cluster_name }}"
-          cluster_version: "{{ .Values.cluster_version }}"
+        cluster_name: "{{ .Values.cluster_name }}"
+        cluster_version: "{{ .Values.cluster_version }}"
   destination:
     server: https://kubernetes.default.svc
     namespace: default

@@ -14,7 +14,7 @@ spec:
   - name: pre-task-git-url
     type: string
     description: Git URL for pre-provision task
-    default: "https://github.com/jmelis/regionality"
+    default: "https://github.com/jmelis/regionality.git"
   - name: pre-task-path
     type: string
     description: Path to pre-provision task in git repo
@@ -28,7 +28,7 @@ spec:
   - name: provision-task-git-url
     type: string
     description: Git URL for provision task
-    default: "https://github.com/jmelis/regionality"
+    default: "https://github.com/jmelis/regionality.git"
   - name: provision-task-path
     type: string
     description: Path to provision task in git repo
@@ -42,7 +42,7 @@ spec:
   - name: post-task-git-url
     type: string
     description: Git URL for post-provision task
-    default: "https://github.com/jmelis/regionality"
+    default: "https://github.com/jmelis/regionality.git"
   - name: post-task-path
     type: string
     description: Path to post-provision task in git repo
@@ -76,7 +76,7 @@ spec:
       params:
       - name: url
         value: $(params.pre-task-git-url)
-      - name: path
+      - name: pathInRepo
         value: $(params.pre-task-path)
       - name: revision
         value: $(params.pre-task-revision)
@@ -93,7 +93,7 @@ spec:
       params:
       - name: url
         value: $(params.provision-task-git-url)
-      - name: path
+      - name: pathInRepo
         value: $(params.provision-task-path)
       - name: revision
         value: $(params.provision-task-revision)
@@ -111,7 +111,7 @@ spec:
       params:
       - name: url
         value: $(params.post-task-git-url)
-      - name: path
+      - name: pathInRepo
         value: $(params.post-task-path)
       - name: revision
         value: $(params.post-task-revision)

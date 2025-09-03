@@ -7,7 +7,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .cluster_name }}-configmap
-  namespace: clusters
+  namespace: default
 data:
 {{- range $key, $value := $mergedData }}
   {{ $key }}: {{ $value | quote }}

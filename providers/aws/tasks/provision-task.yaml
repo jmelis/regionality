@@ -1,58 +1,26 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: cluster-provision-task
+  name: provision-task
   namespace: default
 spec:
   params:
   - name: configmap
     type: string
     description: Name of the configmap containing cluster configuration
-  workspaces:
-  - name: source
-    description: Workspace for cloning the repository
   volumes:
   - name: config-volume
     configMap:
       name: $(params.configmap)
   steps:
   - name: provision
-    image: bitnami/kubectl:latest
-    workingDir: $(workspaces.source.path)
+    image: busybox:latest
     envFrom:
     - configMapRef:
         name: $(params.configmap)
     script: |
-      #!/bin/bash
-      set -e
-
-      echo "=== CLUSTER PROVISION TASK ==="
+      #!/bin/sh
+      echo "=== PROVISION TASK ==="
+      echo "Task: `provision"
       echo "ConfigMap: $(params.configmap)"
-
-      # Install git and helm
-      apt-get update && apt-get install -y git curl
-      curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      # Clone the workload repository
-      echo "Cloning repository: $WORKLOAD_REPO_URL"
-      git clone $WORKLOAD_REPO_URL workload-repo
-      cd workload-repo
-      git checkout $WORKLOAD_REPO_REVISION
-
-      # Generate ArgoCD Application using Helm
-      echo "Generating ArgoCD Application from $WORKLOAD_HELM_DIR"
-      helm template argocd-app $WORKLOAD_HELM_DIR --set cluster.name=$(params.configmap | sed 's/-configmap$//') > application.yaml
-
-      # Apply the Application
-      echo "Applying ArgoCD Application"
-      kubectl apply -f application.yaml
-
-      # Wait for Application to be synced
-      APP_NAME=$(kubectl get application -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-      if [ -n "$APP_NAME" ]; then
-        echo "Waiting for Application $APP_NAME to sync..."
-        kubectl wait --for=condition=Synced application/$APP_NAME --timeout=300s
-        echo "Application $APP_NAME synced successfully"
-      else
-        echo "No ArgoCD Application found, assuming first-time deployment"
-      fi
+      env | sort

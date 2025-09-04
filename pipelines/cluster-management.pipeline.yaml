@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: cluster-pipeline
+  name: cluster-management
   namespace: default
 spec:
   params:

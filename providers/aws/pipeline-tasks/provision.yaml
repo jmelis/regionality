@@ -41,7 +41,7 @@ spec:
       done
       cat values.yaml
 
-      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl create -f -
+      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl apply -f -
 
 
 

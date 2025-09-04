@@ -15,6 +15,9 @@ spec:
   steps:
   - name: provision
     image: alpine:latest
+    envFrom:
+    - configMapRef:
+        name: $(params.configmap)
     volumeMounts:
     - name: config-volume
       mountPath: /etc/config

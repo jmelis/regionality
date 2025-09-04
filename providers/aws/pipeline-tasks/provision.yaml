@@ -34,11 +34,11 @@ spec:
       for file in /etc/config/*; do
         key=$(basename "$file")
         value=$(cat "$file")
-        echo "$key: $value" >> repo/$PROVISION_APPLICATION_PATH/values.yaml
+        echo "$key: $value" >> values.yaml
       done
-      cat repo/$PROVISION_APPLICATION_PATH/values.yaml
+      cat values.yaml
 
-      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl apply -f -
+      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl create -f -
 
 
 

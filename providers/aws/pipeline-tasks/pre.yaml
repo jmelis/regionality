@@ -20,5 +20,7 @@ spec:
         name: $(params.configmap)
     script: |
       #!/bin/sh
-      apk add
-
+      echo "=== PRE-PROVISION TASK ==="
+      echo "Task: pre"
+      echo "ConfigMap: $(params.configmap)"
+      env | sort

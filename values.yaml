@@ -13,8 +13,8 @@ defaults:
   data:
     PROVISION_REPO: "https://github.com/jmelis/regionality.git"
     PROVISION_REVISION: "main"
-    PROVISION_PATH: "providers/aws/provision"
     PROVISION_APPLICATION_PATH: "providers/aws/provision-application"
+    PROVISION_PATH: "providers/aws/provision"
 
 # defaults per sector
 sectors:

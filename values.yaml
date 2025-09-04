@@ -2,13 +2,13 @@
 defaults:
   tasks:
     pre-task-git-url: "https://github.com/jmelis/regionality.git"
-    pre-task-path: "tasks/aws/pre-task.yaml"
+    pre-task-path: "providers/aws/tasks/pre-task.yaml"
     pre-task-revision: "main"
     provision-task-git-url: "https://github.com/jmelis/regionality.git"
-    provision-task-path: "tasks/aws/provision-task.yaml"
+    provision-task-path: "providers/aws/tasks/provision-task.yaml"
     provision-task-revision: "main"
     post-task-git-url: "https://github.com/jmelis/regionality.git"
-    post-task-path: "tasks/aws/post-task.yaml"
+    post-task-path: "providers/aws/tasks/post-task.yaml"
     post-task-revision: "main"
     run-pre: "true"
     run-provision: "true"

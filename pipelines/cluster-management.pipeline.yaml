@@ -18,7 +18,7 @@ spec:
   - name: pre-task-path
     type: string
     description: Path to pre-provision task in git repo
-    default: "tasks/aws/pre-task.yaml"
+    default: "providers/aws/tasks/pre-task.yaml"
   - name: pre-task-revision
     type: string
     description: Git revision for pre-provision task
@@ -32,7 +32,7 @@ spec:
   - name: provision-task-path
     type: string
     description: Path to provision task in git repo
-    default: "tasks/aws/provision-task.yaml"
+    default: "providers/aws/tasks/provision-task.yaml"
   - name: provision-task-revision
     type: string
     description: Git revision for provision task
@@ -46,7 +46,7 @@ spec:
   - name: post-task-path
     type: string
     description: Path to post-provision task in git repo
-    default: "tasks/aws/post-task.yaml"
+    default: "providers/aws/tasks/post-task.yaml"
   - name: post-task-revision
     type: string
     description: Git revision for post-provision task

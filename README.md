@@ -86,3 +86,14 @@ Since the provision task is specific to the provider, it can be customized for e
 
 This enables progressive delivery across sectors, regions and clusters.
 
+## Usage
+
+### Cluster Configmaps
+
+Begin by filling in the `values.yaml` file with the cluster configuration.
+
+Then, apply the cluster configmaps ArgoCD Application:
+
+```bash
+kubectl apply -f cluster-configs/cluster-configs.application.yaml
+```

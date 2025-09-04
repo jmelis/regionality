@@ -65,9 +65,6 @@ spec:
     type: string
     default: "true"
     description: Whether to run the post-provision task (true/false)
-  workspaces:
-  - name: source
-    description: Shared workspace for pipeline tasks
   tasks:
   - name: pre-task
     when:
@@ -103,9 +100,6 @@ spec:
     params:
     - name: configmap
       value: $(params.configmap)
-    workspaces:
-    - name: source
-      workspace: source
     runAfter: [pre-task]
   - name: post-task
     when:

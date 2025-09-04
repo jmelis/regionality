@@ -14,7 +14,7 @@ metadata:
     sector: "{{ $regionConfig.sector }}"
 spec:
   pipelineRef:
-    name: cluster-pipeline
+    name: cluster-management
   params:
     - name: configmap
       value: "{{ .Values.cluster_name }}-configmap"
@@ -36,18 +36,15 @@ spec:
       value: {{ index $mergedTasks "post-task-path" | quote }}
     - name: post-task-revision
       value: {{ index $mergedTasks "post-task-revision" | quote }}
+    {{- if hasKey .Values "run-pre" }}
     - name: run-pre
-      value: {{ index $mergedTasks "run-pre" | quote }}
+      value: {{ index .Values "run-pre" }}
+    {{- end }}
+    {{- if hasKey .Values "run-provision" }}
     - name: run-provision
-      value: {{ index $mergedTasks "run-provision" | quote }}
+      value: {{ index .Values "run-provision" }}
+    {{- end }}
+    {{- if hasKey .Values "run-post" }}
     - name: run-post
-      value: {{ index $mergedTasks "run-post" | quote }}
-  workspaces:
-    - name: source
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
+      value: {{ index .Values "run-post" }}
+    {{- end }}

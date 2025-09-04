@@ -88,12 +88,43 @@ This enables progressive delivery across sectors, regions and clusters.
 
 ## Usage
 
-### Cluster Configmaps
+### `values.yaml`
 
-Begin by filling in the `values.yaml` file with the cluster configuration.
+Fill in the `values.yaml` file with the cluster configuration.
 
-Then, apply the cluster configmaps ArgoCD Application:
+### Install Cluster Configmaps and Pipelines ArgoCD Applications
 
 ```bash
-kubectl apply -f cluster-configs/cluster-configs.application.yaml
+kubectl apply -f central-control-plane-applications/
+```
+
+This should install the cluster configmaps, e.g.:
+
+```bash
+kubectl get configmaps -n default
+NAME                   DATA   AGE
+cluster-01-configmap   7      69s
+cluster-02-configmap   7      69s
+cluster-03-configmap   6      69s
+...
+```
+
+And the pipelines:
+
+```bash
+kubectl get pipelines
+NAME                 AGE
+cluster-management   2m52s
+```
+
+### Trigger a Pipeline Run
+
+```bash
+tkn pipeline start cluster-management -w name=source,workspace=source -w name=destination,workspace=destination
+```
+
+### View the Pipeline Run
+
+```bash
+kubectl get pipelineruns
 ```

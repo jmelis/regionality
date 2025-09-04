@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/jmelis/regionality.git
-    targetRevision: main
+    targetRevision: HEAD
     path: providers/aws/provision/
     helm:
       values: |

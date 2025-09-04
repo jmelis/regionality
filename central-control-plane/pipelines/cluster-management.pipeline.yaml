@@ -22,7 +22,7 @@ spec:
   - name: pre-task-revision
     type: string
     description: Git revision for pre-provision task
-    default: "main"
+    default: "HEAD"
 
   # provision-task
   - name: provision-task-git-url
@@ -36,7 +36,7 @@ spec:
   - name: provision-task-revision
     type: string
     description: Git revision for provision task
-    default: "main"
+    default: "HEAD"
 
   # post-task
   - name: post-task-git-url
@@ -50,7 +50,7 @@ spec:
   - name: post-task-revision
     type: string
     description: Git revision for post-provision task
-    default: "main"
+    default: "HEAD"
 
   # selectively run tasks
   - name: run-pre

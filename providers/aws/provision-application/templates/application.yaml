@@ -2,18 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: "{{ .Values.cluster_name }}"
+  name: "{{ .Values.CLUSTER_NAME }}"
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/jmelis/regionality.git
     targetRevision: main
-    path: provision-templates/aws
+    path: providers/aws/provision/
     helm:
-      valuesObject:
-        cluster_name: "{{ .Values.cluster_name }}"
-        cluster_version: "{{ .Values.cluster_version }}"
+      values: |
+        {{- .Values | toYaml | nindent 8 }}
   destination:
     server: https://kubernetes.default.svc
     namespace: default

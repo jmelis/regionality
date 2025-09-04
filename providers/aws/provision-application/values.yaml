@@ -1,2 +1,8 @@
-cluster_name: "test"
-cluster_version: "1.28"
+CLUSTER_NAME: cluster-01
+CLUSTER_KEY: c01
+DEPLOYMENT_STRATEGY: blue-green
+MONITORING_LEVEL: verbose
+TIMEZONE: Europe/London
+WORKLOAD_HELM_DIR: provision-templates/aws
+WORKLOAD_REPO_REVISION: main
+WORKLOAD_REPO_URL: https://github.com/jmelis/regionality.git

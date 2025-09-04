@@ -11,9 +11,10 @@ defaults:
     post-task-path: "providers/aws/tasks/post-task.yaml"
     post-task-revision: "main"
   data:
-    WORKLOAD_REPO_URL: "https://github.com/jmelis/regionality.git"
-    WORKLOAD_REPO_REVISION: "main"
-    WORKLOAD_HELM_DIR: "provision-templates/aws"
+    PROVISION_REPO: "https://github.com/jmelis/regionality.git"
+    PROVISION_REVISION: "main"
+    PROVISION_PATH: "providers/aws/provision"
+    PROVISION_APPLICATION_PATH: "providers/aws/provision-application"
 
 # defaults per sector
 sectors:

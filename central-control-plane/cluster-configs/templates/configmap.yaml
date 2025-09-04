@@ -9,6 +9,7 @@ metadata:
   name: {{ $clusterName }}-configmap
   namespace: default
 data:
+  CLUSTER_NAME: {{ $clusterName }}
 {{- range $key, $value := $mergedData }}
   {{ $key }}: {{ $value | quote }}
 {{- end }}

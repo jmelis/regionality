@@ -2,6 +2,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: provisioned-cluster-{{ .Values.cluster_name }}
+  name: provisioned-cluster-{{ .Values.CLUSTER_NAME }}
 data:
-  cluster_version: "{{ .Values.cluster_version }}"
+  CLUSTER_NAME: {{ .Values.CLUSTER_NAME }}
+  CLUSTER_KEY: {{ .Values.CLUSTER_KEY }}
+  DEPLOYMENT_STRATEGY: {{ .Values.DEPLOYMENT_STRATEGY }}
+  MONITORING_LEVEL: {{ .Values.MONITORING_LEVEL }}
+  TIMEZONE: {{ .Values.TIMEZONE }}
+  WORKLOAD_HELM_DIR: {{ .Values.WORKLOAD_HELM_DIR }}
+  WORKLOAD_REPO_REVISION: {{ .Values.WORKLOAD_REPO_REVISION }}

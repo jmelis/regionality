@@ -14,14 +14,11 @@ spec:
       name: $(params.configmap)
   steps:
   - name: pre-provision
-    image: busybox:latest
+    image: apline:latest
     envFrom:
     - configMapRef:
         name: $(params.configmap)
     script: |
       #!/bin/sh
-      echo "=== PRE-PROVISION TASK ==="
-      echo "Task: pre"
-      echo "ConfigMap: $(params.configmap)"
-      env | sort
+      apk add
 

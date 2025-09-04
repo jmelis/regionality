@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: provision-task
+  namespace: default
+spec:
+  params:
+  - name: configmap
+    type: string
+    description: Name of the configmap containing cluster configuration
+  volumes:
+  - name: config-volume
+    configMap:
+      name: $(params.configmap)
+  steps:
+  - name: provision
+    image: busybox:latest
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/config
+    script: |
+      #!/bin/sh
+      set -exvo pipefail
+
+      echo "=== PROVISION TASK ==="
+      env | sort
+
+      apk add --no-cache git helm kubectl
+
+      git clone $PROVISION_REPO repo
+      (cd repo && git checkout $PROVISION_REVISION)
+
+      # Generate values.yaml from configmap
+      for file in /etc/config/*; do
+        key=$(basename "$file")
+        value=$(cat "$file")
+        echo "$key: $value" >> repo/$PROVISION_APPLICATION_PATH/values.yaml
+      done
+      cat repo/$PROVISION_APPLICATION_PATH/values.yaml
+
+      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl apply -f -
+
+
+

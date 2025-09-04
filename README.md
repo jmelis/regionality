@@ -117,14 +117,23 @@ NAME                 AGE
 cluster-management   2m52s
 ```
 
-### Trigger a Pipeline Run
+### Provision a Cluster
+
+A `PipelineRun` can be triggered by using the `pipelinerun-trigger` chart.
 
 ```bash
-tkn pipeline start cluster-management -w name=source,workspace=source -w name=destination,workspace=destination
+helm template central-control-plane/pipelinerun-trigger --set cluster-name=cluster-01 | kubectl create -f -
 ```
+
+The `cluster-name` parameter is mandatory.
+
+Note that tasks can be disabled by setting the `run-pre`, `run-provision` and `run-post` parameters to `false`, e.g.:
+
+```bash
+helm template central-control-plane/pipelinerun-trigger --set cluster-name=cluster-01 --set run-post=false --set run-provision=false | kubectl create -f -
+```
+
+Note that
+This will install the `pipelinerun-trigger` chart, which will create a `PipelineRun` for the cluster.
 
 ### View the Pipeline Run
-
-```bash
-kubectl get pipelineruns
-```

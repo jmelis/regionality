@@ -1,4 +1,5 @@
-{{- $clusterConfig := index .Values.clusters .Values.cluster_name }}
+{{- $clusterName := index .Values "cluster-name" }}
+{{- $clusterConfig := index .Values.clusters $clusterName }}
 {{- $regionConfig := index .Values.regions $clusterConfig.region }}
 {{- $sectorDefaults := index .Values.sectors $regionConfig.sector }}
 {{- $mergedTasks := merge $clusterConfig.tasks $regionConfig.tasks $sectorDefaults.tasks .Values.defaults.tasks }}
@@ -6,10 +7,10 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: "{{ .Values.cluster_name }}-pipelinerun-"
+  generateName: "{{ $clusterName }}-pipelinerun-"
   namespace: default
   labels:
-    cluster: "{{ .Values.cluster_name }}"
+    cluster: "{{ $clusterName }}"
     region: "{{ $clusterConfig.region }}"
     sector: "{{ $regionConfig.sector }}"
 spec:
@@ -17,7 +18,7 @@ spec:
     name: cluster-management
   params:
     - name: configmap
-      value: "{{ .Values.cluster_name }}-configmap"
+      value: "{{ $clusterName }}-configmap"
     - name: pre-task-git-url
       value: {{ index $mergedTasks "pre-task-git-url" | quote }}
     - name: pre-task-path

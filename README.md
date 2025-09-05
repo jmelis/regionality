@@ -43,6 +43,55 @@ All tasks MUST be **idempotent** and can be selectively enabled/disabled.
     └── <other-providers>/                         # Additional providers
 ```
 
+## Design
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Helm
+    participant K8s as Kubernetes
+    participant ArgoCD
+    participant Tekton
+    participant Git
+
+    Note over User,Git: Setup Phase
+    User->>K8s: kubectl apply ArgoCD applications
+    ArgoCD->>Git: Sync cluster-configs chart
+    ArgoCD->>K8s: 📋 Create cluster ConfigMaps
+    ArgoCD->>Git: Sync pipelines chart
+    ArgoCD->>K8s: Create cluster-management pipeline
+
+    Note over User,Git: Cluster Provisioning
+    User->>Helm: helm template pipelinerun-trigger
+    User->>K8s: kubectl create PipelineRun
+
+    rect rgb(255, 248, 240)
+        Note over Tekton,Git: Pre-provision Stage
+        Tekton->>K8s: 📋 Load cluster ConfigMap
+        Tekton->>Git: Fetch pre-task (using ConfigMap params)
+        Tekton->>Tekton: Run pre-provision (with ConfigMap data)
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Tekton,Git: Provision Stage
+        Tekton->>K8s: 📋 Load cluster ConfigMap
+        Tekton->>Git: Fetch provision-task (using ConfigMap params)
+        Tekton->>Git: Clone provision repo (using ConfigMap params)
+        Tekton->>Helm: Generate ArgoCD app (with ConfigMap values)
+        Tekton->>K8s: Apply ArgoCD app
+        ArgoCD->>K8s: Provision cluster resources
+    end
+
+    rect rgb(245, 250, 255)
+        Note over Tekton,Git: Post-provision Stage
+        Tekton->>K8s: 📋 Load cluster ConfigMap
+        Tekton->>Git: Fetch post-task (using ConfigMap params)
+        Tekton->>Tekton: Run post-provision (with ConfigMap data)
+    end
+
+    Tekton->>User: Pipeline complete
+```
+
 ## Configuration System
 
 ### Hierarchical Configuration (`values.yaml`)
@@ -194,6 +243,8 @@ Trigger cluster provisioning using the PipelineRun trigger:
 helm template central-control-plane/pipelinerun-trigger \
   --set cluster-name=cluster-01 | kubectl create -f -
 ```
+
+This PipelineRun should be committed to the repository and applied using a dedicated ArgoCD Application. That way PipelineRuns can follow the same GitOps workflow as the rest of the system.
 
 #### Selective Task Execution
 

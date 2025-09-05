@@ -1,8 +1,42 @@
-{{- $clusterName := index .Values "cluster-name" }}
-{{- $clusterConfig := index .Values.clusters $clusterName }}
-{{- $regionConfig := index .Values.regions $clusterConfig.region }}
-{{- $sectorDefaults := index .Values.sectors $regionConfig.sector }}
-{{- $mergedTasks := merge $clusterConfig.tasks $regionConfig.tasks $sectorDefaults.tasks .Values.defaults.tasks }}
+{{- $targetClusters := list }}
+
+{{- if hasKey .Values "cluster-name" }}
+  {{- $clusterName := index .Values "cluster-name" }}
+  {{- if hasKey .Values.clusters $clusterName }}
+    {{- $targetClusters = append $targetClusters $clusterName }}
+  {{- else }}
+    {{- fail (printf "Cluster '%s' not found in values.yaml" $clusterName) }}
+  {{- end }}
+{{- else if hasKey .Values "region" }}
+  {{- $targetRegion := .Values.region }}
+  {{- range $clusterName, $clusterConfig := .Values.clusters }}
+    {{- if eq $clusterConfig.region $targetRegion }}
+      {{- $targetClusters = append $targetClusters $clusterName }}
+    {{- end }}
+  {{- end }}
+  {{- if eq (len $targetClusters) 0 }}
+    {{- fail (printf "No clusters found in region '%s'" $targetRegion) }}
+  {{- end }}
+{{- else if hasKey .Values "sector" }}
+  {{- $targetSector := .Values.sector }}
+  {{- range $clusterName, $clusterConfig := .Values.clusters }}
+    {{- $regionConfig := index $.Values.regions $clusterConfig.region }}
+    {{- if eq $regionConfig.sector $targetSector }}
+      {{- $targetClusters = append $targetClusters $clusterName }}
+    {{- end }}
+  {{- end }}
+  {{- if eq (len $targetClusters) 0 }}
+    {{- fail (printf "No clusters found in sector '%s'" $targetSector) }}
+  {{- end }}
+{{- else }}
+  {{- fail "Must specify one of: --set cluster-name=<name>, --set region=<region>, or --set sector=<sector>" }}
+{{- end }}
+
+{{- range $clusterName := $targetClusters }}
+{{- $clusterConfig := index $.Values.clusters $clusterName }}
+{{- $regionConfig := index $.Values.regions $clusterConfig.region }}
+{{- $sectorDefaults := index $.Values.sectors $regionConfig.sector }}
+{{- $mergedTasks := merge $clusterConfig.tasks $regionConfig.tasks $sectorDefaults.tasks $.Values.defaults.tasks }}
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
@@ -37,15 +71,16 @@ spec:
       value: {{ index $mergedTasks "post-task-path" | quote }}
     - name: post-task-revision
       value: {{ index $mergedTasks "post-task-revision" | quote }}
-    {{- if hasKey .Values "run-pre" }}
+    {{- if hasKey $.Values "run-pre" }}
     - name: run-pre
-      value: {{ index .Values "run-pre" }}
+      value: {{ index $.Values "run-pre" }}
     {{- end }}
-    {{- if hasKey .Values "run-provision" }}
+    {{- if hasKey $.Values "run-provision" }}
     - name: run-provision
-      value: {{ index .Values "run-provision" }}
+      value: {{ index $.Values "run-provision" }}
     {{- end }}
-    {{- if hasKey .Values "run-post" }}
+    {{- if hasKey $.Values "run-post" }}
     - name: run-post
-      value: {{ index .Values "run-post" }}
+      value: {{ index $.Values "run-post" }}
     {{- end }}
+{{- end }}

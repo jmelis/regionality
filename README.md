@@ -244,8 +244,17 @@ cluster-management   14s
 Trigger cluster provisioning using the PipelineRun trigger:
 
 ```bash
+# Single cluster
 helm template central-control-plane/pipelinerun-trigger \
   --set cluster-name=cluster-01 | kubectl create -f -
+
+# Target a region
+helm template central-control-plane/pipelinerun-trigger \
+  --set region=us-east-1 | kubectl create -f -
+
+# Target a sector
+helm template central-control-plane/pipelinerun-trigger \
+  --set sector=prod-01 | kubectl create -f -
 ```
 
 You can disable specific pipeline stages:

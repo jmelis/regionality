@@ -94,10 +94,10 @@ sequenceDiagram
 
 ### Configuration Sections
 
-- **`defaults`**: Base configuration for all clusters
-- **`sectors`**: Environment-specific defaults
-- **`regions`**: Geographic defaults with sector mapping
-- **`clusters`**: Individual cluster configurations
+- `defaults`: Base configuration for all clusters
+- `sectors`: sector-specific defaults
+- `regions`: regional defaults (takes precedence over sectors) and **sector mapping**
+- `clusters`: Individual cluster configurations (takes precedence over regions and sectors) and **region mapping**
 
 The configuration follows a hierarchical inheritance model:
 
@@ -343,9 +343,10 @@ sectors:
 
 This hierarchical task configuration enables fine-grained control over which task versions run in different environments while maintaining consistency where needed.
 
-All tasks MUST be **idempotent** and can be selectively enabled/disabled.
+All tasks **MUST** be idempotent and can be selectively enabled/disabled.
 
 ## TODO
 
 - ArgoCD Application to apply PipelineRuns
 - `values.yaml` might become too large, how do we decompose it?
+- read configmap once, and pass it to the tasks

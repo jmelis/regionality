@@ -4,21 +4,19 @@ A GitOps-based Kubernetes cluster management system that provides centralized pr
 
 ## Overview
 
-This system enables:
+The system centers around a `values.yaml` file that acts as the source of truth, containing cluster provisioning configurations with hierarchical inheritance (clusters → regions → sectors → defaults). An ArgoCD application converts this file into cluster-specific ConfigMaps through Helm chart rendering, which the Cluster Management pipeline then uses as input parameters.
+
+The Cluster Management pipeline has three fully pluggable tasks: pre-provision, provision, and post-provision. Tasks are fetched from Git repositories at URLs and revisions specified in the configuration. When a task needs to apply resources to the cluster, such as the provision stage, it creates an ArgoCD application with a Helm chart that uses the same ConfigMap data to reconcile the desired cluster resources.
+
+This architecture enables progressive delivery by allowing different task versions and configurations to be deployed across sectors, regions, and individual clusters while maintaining the ConfigMaps as the single source of truth that drives all pipeline execution.
+
+Key features:
+
 - **Progressive delivery** across sectors, regions, and individual clusters
 - **Pluggable pipeline tasks** for different cloud providers
-- **Hierarchical configuration** with inheritance from defaults → sectors → regions → clusters
+- **Hierarchical configuration** with inheritance from clusters → regions → sectors → defaults
 - **GitOps workflow** using ArgoCD for declarative cluster management
 - **Cross-repository modularity** for pipeline tasks and provisioning templates
-
-### Cluster Management Pipeline
-
-Each cluster is managed through a three-stage pipeline:
-- **Pre-provision**: Setup tasks before cluster creation
-- **Provision**: Actual cluster provisioning using cloud-specific resources
-- **Post-provision**: Configuration and validation after cluster creation
-
-All tasks MUST be **idempotent** and can be selectively enabled/disabled.
 
 ## Project Structure
 
@@ -94,20 +92,18 @@ sequenceDiagram
 
 ## Configuration System
 
-### Hierarchical Configuration (`values.yaml`)
+### Configuration Sections
+
+- **`defaults`**: Base configuration for all clusters
+- **`sectors`**: Environment-specific defaults
+- **`regions`**: Geographic defaults with sector mapping
+- **`clusters`**: Individual cluster configurations
 
 The configuration follows a hierarchical inheritance model:
 
 ```
 cluster config → region config → sector config → defaults
 ```
-
-### Configuration Sections
-
-- **`defaults`**: Base configuration for all clusters
-- **`sectors`**: Environment-specific defaults (canary, prod-01, prod-02)
-- **`regions`**: Geographic defaults with sector mapping
-- **`clusters`**: Individual cluster configurations
 
 ### Example Configuration Structure
 
@@ -156,23 +152,27 @@ clusters:
 ### Development Setup
 
 1. **Create local cluster**:
-   ```bash
-   kind create cluster --name central-control-plane
-   ```
+
+    ```bash
+    kind create cluster --name central-control-plane
+    ```
 
 2. **Install ArgoCD**:
+
    ```bash
    kubectl create namespace argocd
    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
    ```
 
 3. **Install Tekton**:
+
    ```bash
    kubectl create namespace tekton-pipelines
    kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
    ```
 
 4. **Install Tekton Dashboard** (optional):
+
    ```bash
    kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release-full.yaml
    ```
@@ -191,6 +191,7 @@ kubectl port-forward svc/tekton-dashboard -n tekton-pipelines 9097:9097
 ```
 
 Get ArgoCD admin password:
+
 ```bash
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 ```
@@ -202,6 +203,7 @@ kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.pas
 Edit `values.yaml` to define your clusters, regions, and sectors according to your infrastructure needs.
 
 Validate your configuration:
+
 ```bash
 helm template central-control-plane/cluster-configs
 ```
@@ -215,10 +217,12 @@ kubectl apply -f central-control-plane-applications/
 ```
 
 This creates:
+
 - Cluster ConfigMaps for each defined cluster
 - The cluster management pipeline
 
 Verify installation:
+
 ```bash
 # Check ConfigMaps
 kubectl get configmaps -n default
@@ -244,10 +248,6 @@ helm template central-control-plane/pipelinerun-trigger \
   --set cluster-name=cluster-01 | kubectl create -f -
 ```
 
-This PipelineRun should be committed to the repository and applied using a dedicated ArgoCD Application. That way PipelineRuns can follow the same GitOps workflow as the rest of the system.
-
-#### Selective Task Execution
-
 You can disable specific pipeline stages:
 
 ```bash
@@ -262,6 +262,9 @@ helm template central-control-plane/pipelinerun-trigger \
   --set run-provision=false \
   --set run-post=false | kubectl create -f -
 ```
+
+NOTE: The recommended approach is commit the PipelineRun to the repository and apply it using a dedicated ArgoCD Application, as opposed to applying the PipelineRun directly. This enables PipelineRuns to follow the same GitOps workflow as the rest of the system.
+
 
 ### 4. Monitor Progress
 
@@ -292,7 +295,7 @@ kubectl logs -f <pod-name>
    - `provision/` - Provider-specific resource definitions
 4. Update task references in `values.yaml`
 
-Note that these tasks can be defined in an external repository.
+NOTE: These tasks can be defined in an external repository.
 
 ### Customizing Pipeline Tasks
 
@@ -305,7 +308,14 @@ Tasks are dynamically loaded from Git repositories and can be customized at any 
 
 #### Task Configuration Parameters
 
+Each cluster is managed through a three-stage pipeline:
+
+- **Pre-provision**: Setup tasks before cluster creation
+- **Provision**: Actual cluster provisioning using cloud-specific resources
+- **Post-provision**: Configuration and validation after cluster creation
+
 Each task stage (`pre`, `provision`, `post`) uses three parameters:
+
 - `{stage}-task-git-url`: Git repository URL
 - `{stage}-task-path`: Path to the task YAML file within the repository
 - `{stage}-task-revision`: Git revision (branch, tag, or commit SHA)
@@ -323,3 +333,5 @@ sectors:
 ```
 
 This hierarchical task configuration enables fine-grained control over which task versions run in different environments while maintaining consistency where needed.
+
+All tasks MUST be **idempotent** and can be selectively enabled/disabled.

@@ -12,9 +12,9 @@ This architecture enables progressive delivery by allowing different task versio
 
 Key features:
 
-- **Progressive delivery** across sectors, regions, and individual clusters
 - **Pluggable pipeline tasks** for different cloud providers
 - **Hierarchical configuration** with inheritance from clusters → regions → sectors → defaults
+- **Progressive delivery** supported thanks to the hierarchical configuration
 - **GitOps workflow** using ArgoCD for declarative cluster management
 - **Cross-repository modularity** for pipeline tasks and provisioning templates
 

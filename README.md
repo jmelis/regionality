@@ -1,179 +1,274 @@
-# README
+# Central Control Plane
 
-## Project structure
+A GitOps-based Kubernetes cluster management system that provides centralized provisioning and lifecycle management for multiple clusters across regions and sectors.
 
-```bash
+## Overview
+
+This system enables:
+- **Progressive delivery** across sectors, regions, and individual clusters
+- **Pluggable pipeline tasks** for different cloud providers
+- **Hierarchical configuration** with inheritance from defaults → sectors → regions → clusters
+- **GitOps workflow** using ArgoCD for declarative cluster management
+- **Cross-repository modularity** for pipeline tasks and provisioning templates
+
+### Cluster Management Pipeline
+
+Each cluster is managed through a three-stage pipeline:
+- **Pre-provision**: Setup tasks before cluster creation
+- **Provision**: Actual cluster provisioning using cloud-specific resources
+- **Post-provision**: Configuration and validation after cluster creation
+
+All tasks MUST be **idempotent** and can be selectively enabled/disabled.
+
+## Project Structure
+
+```
 .
-├── values.yaml # Cluster information (with inheritance from region, sector and defaults)
-├── central-control-plane-applications
-│   ├── central-control-plane-pipelines.application.yaml # ArgoCD Application that install pipelines helm chart
-│   └── cluster-configs.application.yaml # ArgoCD Application that install cluster-configs helm chart
-├── central-control-plane
-│   ├── cluster-configs # Helm chart that renders the cluster configmaps from the `values.yaml` file
-│   ├── pipelines # Helm chart that renders the pluggable pipeline from the `values.yaml` file
-│   └── pipelinerun-trigger # Helm chart that creates the PipelineRun for the cluster
-└── providers
-    ├── aws # AWS specific tasks and provision templates
-    │   ├── provision-application # ArgoCD Application that install the provision templates helm chart
-    │   ├── provision # Helm chart that renders the provision templates from the `values.yaml` file
-    │   ├── pipeline-tasks # Providers specific pipeline tasks
-    │   │   ├── post.yaml
-    │   │   ├── pre.yaml
-    │   │   └── provision.yaml
-    ├── <another provider e.g. azure, gcp, etc.>
-    │   └── ...
-    └── ...
+├── values.yaml                                    # Main configuration file
+├── central-control-plane-applications/            # ArgoCD Applications
+│   ├── central-control-plane-pipelines.application.yaml
+│   └── cluster-configs.application.yaml
+├── central-control-plane/                         # Core components
+│   ├── cluster-configs/                           # Generates cluster ConfigMaps
+│   ├── pipelines/                                 # Tekton pipeline definitions
+│   └── pipelinerun-trigger/                       # PipelineRun trigger chart
+└── providers/                                     # Provider-specific implementations
+    ├── aws/                                       # AWS provider
+    │   ├── provision-application/                 # ArgoCD app for provisioning
+    │   ├── provision/                             # Helm chart for AWS resources
+    │   └── pipeline-tasks/                        # AWS-specific tasks
+    │       ├── pre.yaml
+    │       ├── provision.yaml
+    │       └── post.yaml
+    └── <other-providers>/                         # Additional providers
 ```
 
-## Development setup
+## Configuration System
 
-Required CLI tools:
-- `kind`
-- `kubectl`
-- `helm`
+### Hierarchical Configuration (`values.yaml`)
+
+The configuration follows a hierarchical inheritance model:
+
+```
+cluster config → region config → sector config → defaults
+```
+
+### Configuration Sections
+
+- **`defaults`**: Base configuration for all clusters
+- **`sectors`**: Environment-specific defaults (canary, prod-01, prod-02)
+- **`regions`**: Geographic defaults with sector mapping
+- **`clusters`**: Individual cluster configurations
+
+### Example Configuration Structure
+
+```yaml
+defaults:
+  tasks: ...
+  data:
+    WORKER_MACHINE_TYPE: "m5.xlarge"
+    # ... other defaults
+
+sectors:
+  canary:
+    tasks: ...
+    data:
+      KUBERNETES_VERSION: "1.33"
+      WORKER_MACHINE_COUNT: "2"
+  prod-01:
+    tasks: ...
+    data:
+      KUBERNETES_VERSION: "1.29"
+      WORKER_MACHINE_COUNT: "6"
+
+regions:
+  eu-west-1:
+    sector: canary
+    tasks: ...
+    data:
+      REGION: "eu-west-1"
+
+clusters:
+  cluster-01:
+    region: eu-west-1
+    tasks: ...
+    data:
+      ROLE_ARN: "arn:aws:iam::100000000001:role/central-control-plane"
+```
+
+## Getting Started
+
+### Prerequisites
+
+- `kind` - For local development cluster
+- `kubectl` - Kubernetes CLI
+- `helm` - Helm package manager
+
+### Development Setup
+
+1. **Create local cluster**:
+   ```bash
+   kind create cluster --name central-control-plane
+   ```
+
+2. **Install ArgoCD**:
+   ```bash
+   kubectl create namespace argocd
+   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   ```
+
+3. **Install Tekton**:
+   ```bash
+   kubectl create namespace tekton-pipelines
+   kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+   ```
+
+4. **Install Tekton Dashboard** (optional):
+   ```bash
+   kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release-full.yaml
+   ```
+
+### Access Services
+
+Set up port-forwarding for local access:
 
 ```bash
-# Install kind cluster
-kind create cluster --name central-control-plane
+# ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl port-forward svc/argocd-server -n argocd 8080:80
 
-# Install argocd
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# Install tekton
-kubectl create namespace tekton-pipelines
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-
-# Install tekton dashboard
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release-full.yaml
+# Tekton Dashboard
+kubectl port-forward svc/tekton-dashboard -n tekton-pipelines 9097:9097
 ```
 
-Set up port-forwarding:
-- `kubectl port-forward svc/argocd-server -n argocd 8080:443`
-- `kubectl port-forward svc/tekton-dashboard -n tekton-pipelines 9097:9097`
-
-Get the ArgoCD admin password:
+Get ArgoCD admin password:
 ```bash
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 ```
 
-## Cluster Configuration (`values.yaml`)
-
-The main configuration file where the clusters are defined is `values.yaml`.
-
-It has the following sections:
-- `defaults`: defaults for all clusters
-- `sectors`: defaults per sector
-- `regions`: defaults per region and mapping to sector
-- `clusters`: clusters with their data
-
-For each section, the `data` key is used to set the data for the cluster, and the `tasks` key is used to dynamically fetch the pipeline tasks for the cluster and to enable them selectively.
-
-The `data` section will include the necessary data for the Pipeline tasks to execute, it should include things such as:
-- Cluster version
-- Node type
-- Number of nodes
-- Cloud account ID (if applicable)
-
-The precedence of the data is: `cluster` -> `region` -> `sector` -> `defaults`. Ideally the cluster stanzas should be kept to a minimum, and the data should be inherited from the default, region and sector stanzas.
-
-The reasoning behind this inheritance system is in order to enable progressive delivery across sectors, regions and clusters, and to keep clusters as similar as possible within the same region or sector.
-
-The `central-control-plane/cluster-configs` helm chart is then used to generate a configmap for each cluster.
-
-## Cluster Management Pipeline and Provider Tasks
-
-Each cluster is provisioned and lifecycled using the `central-control-plane/pipelines/cluster-management.pipeline.yaml` pipeline. This pipeline relies on a configmap for each cluster to store the cluster configuration. The configmap is generated using the `values.yaml` file, and the applied to the cluster using the `cluster-configs/cluster-configs.application.yaml` ArgoCD Application.
-
-The Cluster Management Pipeline has exactly three tasks:
-- `pre`: runs before the provision task
-- `provision`: provisions the cluster
-- `post`: runs after the provision task
-
-Note that all tasks MUST be idempotent.
-
-Each task can load the cluster configuration configmap using the regular mechanisms: either as an environment variable and/or as a volume mount.
-
-All tasks are dynamically fetched from the `values.yaml` file, using the following parameters:
-- `pre-task-git-url`: Git URL for pre-provision task
-- `pre-task-path`: Path to pre-provision task in git repo
-- `pre-task-revision`: Git revision for pre-provision task
-- `provision-task-git-url`: Git URL for provision task
-- `provision-task-path`: Path to provision task in git repo
-- `provision-task-revision`: Git revision for provision task
-- `post-task-git-url`: Git URL for post-provision task
-- `post-task-path`: Path to post-provision task in git repo
-- `post-task-revision`: Git revision for post-provision task
-
-This enables cross-repository pluggability of the pipeline tasks.
-
-### Provision Task
-
-The provision task works as follows:
-1. Clone the provision templates repository (url, path and revision should be defined in `values.yaml`). This repository includes a helm chart of the ArgoCD Application to be applied to the cluster, which will in turn apply the CRs required to provision the cluster (stored as another helm chart in the same repository).
-2. Generate the ArgoCD Application using Helm (helm template). It will include the cluster configuration as values passed through the `helm` CLI. These parameters are stored in the configmap referenced by the pipeline run.
-3. ArgoCD applies the helm chart of the CRs required to provision the cluster
-4. Wait for the Application to be synced
-
-Since the provision task is specific to the provider, it can be customized for each provider. In particular, it can be applied from a repo referenced in the `values.yaml` file (repourl, path and revision can be defined in `values.yaml`).
-
-This enables progressive delivery across sectors, regions and clusters.
-
-In the particular example implementation, the url of the repository cloned is obtained from the following parameters defined in `values.yaml`:
-- `PROVISION_REPO`
-- `PROVISION_REVISION`
-- `PROVISION_APPLICATION_PATH`
-- `PROVISION_PATH`
-
 ## Usage
 
-### `values.yaml`
+### 1. Configure Clusters
 
-Fill in the `values.yaml` file with the cluster configuration.
+Edit `values.yaml` to define your clusters, regions, and sectors according to your infrastructure needs.
 
-Verify the rendered configmaps:
-
+Validate your configuration:
 ```bash
 helm template central-control-plane/cluster-configs
 ```
 
-### Install Cluster Configmaps and Pipelines ArgoCD Applications
+### 2. Deploy Control Plane
+
+Install the ArgoCD applications that manage cluster configurations and pipelines:
 
 ```bash
 kubectl apply -f central-control-plane-applications/
 ```
 
-This should install the cluster configmaps, e.g.:
+This creates:
+- Cluster ConfigMaps for each defined cluster
+- The cluster management pipeline
 
+Verify installation:
 ```bash
+# Check ConfigMaps
 kubectl get configmaps -n default
 NAME                   DATA   AGE
-cluster-01-configmap   7      69s
-cluster-02-configmap   7      69s
-cluster-03-configmap   6      69s
+cluster-01-configmap   11     4s
+cluster-02-configmap   11     4s
+cluster-03-configmap   11     4s
+cluster-04-configmap   11     4s
 ...
-```
 
-And the pipelines:
-
-```bash
+# Check pipelines
 kubectl get pipelines
 NAME                 AGE
-cluster-management   2m52s
+cluster-management   14s
 ```
 
-### Lifecycle a Cluster
+### 3. Provision a Cluster
 
-A `PipelineRun` can be triggered by using the `pipelinerun-trigger` chart.
+Trigger cluster provisioning using the PipelineRun trigger:
 
 ```bash
-helm template central-control-plane/pipelinerun-trigger --set cluster-name=cluster-01 | kubectl create -f -
+helm template central-control-plane/pipelinerun-trigger \
+  --set cluster-name=cluster-01 | kubectl create -f -
 ```
 
-The `cluster-name` parameter is mandatory.
+#### Selective Task Execution
 
-Note that tasks can be disabled by setting the `run-pre`, `run-provision` and `run-post` parameters to `false`, e.g.:
+You can disable specific pipeline stages:
 
 ```bash
-helm template central-control-plane/pipelinerun-trigger --set cluster-name=cluster-01 --set run-post=false --set run-provision=false | kubectl create -f -
+# Skip post-provision tasks
+helm template central-control-plane/pipelinerun-trigger \
+  --set cluster-name=cluster-01 \
+  --set run-post=false | kubectl create -f -
+
+# Run only pre-provision tasks
+helm template central-control-plane/pipelinerun-trigger \
+  --set cluster-name=cluster-01 \
+  --set run-provision=false \
+  --set run-post=false | kubectl create -f -
 ```
+
+### 4. Monitor Progress
+
+Track pipeline execution:
+
+```bash
+# List PipelineRuns
+kubectl get pipelineruns
+
+# Get detailed status
+kubectl describe pipelinerun <pipelinerun-name>
+
+# Follow logs
+kubectl logs -f <pod-name>
+```
+
+## Extending the System
+
+### Adding New Providers
+
+1. Create provider directory: `providers/<provider-name>/`
+2. Implement the three required tasks:
+   - `pipeline-tasks/pre.yaml`
+   - `pipeline-tasks/provision.yaml`
+   - `pipeline-tasks/post.yaml`
+3. Create provision templates:
+   - `provision-application/` - ArgoCD application chart
+   - `provision/` - Provider-specific resource definitions
+4. Update task references in `values.yaml`
+
+Note that these tasks can be defined in an external repository.
+
+### Customizing Pipeline Tasks
+
+Tasks are dynamically loaded from Git repositories and can be customized at any level of the configuration hierarchy. The system supports:
+
+- **Different repositories** for different environments or providers
+- **Version pinning** using Git revisions for stability
+- **Path customization** to organize tasks within repositories
+- **Per-environment overrides** for progressive delivery
+
+#### Task Configuration Parameters
+
+Each task stage (`pre`, `provision`, `post`) uses three parameters:
+- `{stage}-task-git-url`: Git repository URL
+- `{stage}-task-path`: Path to the task YAML file within the repository
+- `{stage}-task-revision`: Git revision (branch, tag, or commit SHA)
+
+These parameters should be defined in the `defaults` section of `values.yaml`, but can be overridden at the sector, region and cluster level, e.g.:
+
+```yaml
+sectors:
+  canary:
+    tasks:
+      provision-task-git-url: "https://github.com/myorg/canary-tasks.git"
+      provision-task-revision: "v2.0.0-beta"
+      provision-task-path: "aws/experimental/provision.yaml"
+      ...
+```
+
+This hierarchical task configuration enables fine-grained control over which task versions run in different environments while maintaining consistency where needed.

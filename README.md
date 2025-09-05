@@ -335,3 +335,8 @@ sectors:
 This hierarchical task configuration enables fine-grained control over which task versions run in different environments while maintaining consistency where needed.
 
 All tasks MUST be **idempotent** and can be selectively enabled/disabled.
+
+## TODO
+
+- ArgoCD Application to apply PipelineRuns
+- `values.yaml` might become too large, how do we decompose it?

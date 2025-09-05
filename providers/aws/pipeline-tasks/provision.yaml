@@ -44,8 +44,4 @@ spec:
       helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl apply -f -
 
       # wait for application to be synced
-      kubectl wait application -n argocd $CLUSTER_NAME --for condition=Synced
-
-
-
-
+      kubectl wait application -n argocd $CLUSTER_NAME --for=jsonpath='{.status.sync.status}'=Synced --timeout=300s

@@ -1,13 +1,18 @@
 ---
+# Pretend these are CAPI CRs. For now this is a configmap for demo purposes
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: provisioned-cluster-{{ .Values.CLUSTER_NAME }}
 data:
-  CLUSTER_NAME: {{ .Values.CLUSTER_NAME }}
-  CLUSTER_KEY: {{ .Values.CLUSTER_KEY }}
-  DEPLOYMENT_STRATEGY: {{ .Values.DEPLOYMENT_STRATEGY }}
-  MONITORING_LEVEL: {{ .Values.MONITORING_LEVEL }}
-  TIMEZONE: {{ .Values.TIMEZONE }}
-  WORKLOAD_HELM_DIR: {{ .Values.WORKLOAD_HELM_DIR }}
-  WORKLOAD_REPO_REVISION: {{ .Values.WORKLOAD_REPO_REVISION }}
+  CLUSTER_NAME: "{{ .Values.CLUSTER_NAME }}"
+  ACM_VERSION: "{{ .Values.ACM_VERSION }}"
+  KUBERNETES_VERSION: "{{ .Values.KUBERNETES_VERSION }}"
+  PROVISION_APPLICATION_PATH: "{{ .Values.PROVISION_APPLICATION_PATH }}"
+  PROVISION_PATH: "{{ .Values.PROVISION_PATH }}"
+  PROVISION_REPO: "{{ .Values.PROVISION_REPO }}"
+  PROVISION_REVISION: "{{ .Values.PROVISION_REVISION }}"
+  REGION: "{{ .Values.REGION }}"
+  ROLE_ARN: "{{ .Values.ROLE_ARN }}"
+  WORKER_MACHINE_COUNT: "{{ .Values.WORKER_MACHINE_COUNT }}"
+  WORKER_MACHINE_TYPE: "{{ .Values.WORKER_MACHINE_TYPE }}"

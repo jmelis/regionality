@@ -4,7 +4,16 @@ metadata:
   name: cluster-management
   namespace: default
 spec:
+  workspaces:
+  - name: cluster-config
+    description: Cluster configuration
   params:
+  # git-commit
+  - name: git-commit
+    type: string
+    description: Git commit for the pipeline
+    default: "main"
+
   # configmap
   - name: configmap
     type: string
@@ -66,6 +75,12 @@ spec:
     default: "true"
     description: Whether to run the post-provision task (true/false)
   tasks:
+  - name: load-configmap
+    taskRef:
+      name: load-configmap
+    params:
+    - name: configmap
+      value: $(params.configmap)
   - name: pre-task
     when:
     - input: $(params.run-pre)

@@ -1,0 +1,26 @@
+cluster_name: cluster-04
+configmap: us-east-1-cluster-04-config
+data:
+  ACM_VERSION: '2.13'
+  KUBERNETES_VERSION: '1.29'
+  PROVISION_APPLICATION_PATH: providers/aws/provision-application
+  PROVISION_PATH: providers/aws/provision
+  PROVISION_REPO: https://github.com/jmelis/regionality.git
+  PROVISION_REVISION: prerender-configmaps
+  REGION: us-east-1
+  ROLE_ARN: arn:aws:iam::100000000004:role/central-control-plane
+  WORKER_MACHINE_COUNT: '6'
+  WORKER_MACHINE_TYPE: m5.xlarge
+name: cluster-04
+region: us-east-1
+sector: prod-02
+tasks:
+  post-task-git-url: https://github.com/jmelis/regionality.git
+  post-task-path: providers/aws/pipeline-tasks/post.yaml
+  post-task-revision: prerender-configmaps
+  pre-task-git-url: https://github.com/jmelis/regionality.git
+  pre-task-path: providers/aws/pipeline-tasks/pre.yaml
+  pre-task-revision: prerender-configmaps
+  provision-task-git-url: https://github.com/jmelis/regionality.git
+  provision-task-path: providers/aws/pipeline-tasks/provision.yaml
+  provision-task-revision: prerender-configmaps

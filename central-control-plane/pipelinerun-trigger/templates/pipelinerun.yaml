@@ -1,76 +1,38 @@
-{{- $targetClusters := list }}
-
-{{- if hasKey .Values "cluster-name" }}
-  {{- $clusterName := index .Values "cluster-name" }}
-  {{- if hasKey .Values.clusters $clusterName }}
-    {{- $targetClusters = append $targetClusters $clusterName }}
-  {{- else }}
-    {{- fail (printf "Cluster '%s' not found in values.yaml" $clusterName) }}
-  {{- end }}
-{{- else if hasKey .Values "region" }}
-  {{- $targetRegion := .Values.region }}
-  {{- range $clusterName, $clusterConfig := .Values.clusters }}
-    {{- if eq $clusterConfig.region $targetRegion }}
-      {{- $targetClusters = append $targetClusters $clusterName }}
-    {{- end }}
-  {{- end }}
-  {{- if eq (len $targetClusters) 0 }}
-    {{- fail (printf "No clusters found in region '%s'" $targetRegion) }}
-  {{- end }}
-{{- else if hasKey .Values "sector" }}
-  {{- $targetSector := .Values.sector }}
-  {{- range $clusterName, $clusterConfig := .Values.clusters }}
-    {{- $regionConfig := index $.Values.regions $clusterConfig.region }}
-    {{- if eq $regionConfig.sector $targetSector }}
-      {{- $targetClusters = append $targetClusters $clusterName }}
-    {{- end }}
-  {{- end }}
-  {{- if eq (len $targetClusters) 0 }}
-    {{- fail (printf "No clusters found in sector '%s'" $targetSector) }}
-  {{- end }}
-{{- else }}
-  {{- fail "Must specify one of: --set cluster-name=<name>, --set region=<region>, or --set sector=<sector>" }}
-{{- end }}
-
-{{- range $clusterName := $targetClusters }}
-{{- $clusterConfig := index $.Values.clusters $clusterName }}
-{{- $regionConfig := index $.Values.regions $clusterConfig.region }}
-{{- $sectorDefaults := index $.Values.sectors $regionConfig.sector }}
-{{- $mergedTasks := merge $clusterConfig.tasks $regionConfig.tasks $sectorDefaults.tasks $.Values.defaults.tasks }}
+{{- $prefix := printf "%s-%s" .Values.region (index .Values "cluster_name") }}
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: "{{ $clusterName }}-pipelinerun-"
+  generateName: {{ $prefix }}-pipelinerun-
   namespace: default
   labels:
-    cluster: "{{ $clusterName }}"
-    region: "{{ $clusterConfig.region }}"
-    sector: "{{ $regionConfig.sector }}"
+    cluster: {{ index .Values "cluster_name" | quote }}
+    region: {{ .Values.region | quote }}
+    sector: {{ .Values.sector | quote }}
 spec:
   pipelineRef:
     name: cluster-management
   params:
     - name: configmap
-      value: "{{ $clusterName }}-configmap"
+      value: {{ .Values.configmap | quote }}
     - name: pre-task-git-url
-      value: {{ index $mergedTasks "pre-task-git-url" | quote }}
+      value: {{ index .Values.tasks "pre-task-git-url" | quote }}
     - name: pre-task-path
-      value: {{ index $mergedTasks "pre-task-path" | quote }}
+      value: {{ index .Values.tasks "pre-task-path" | quote }}
     - name: pre-task-revision
-      value: {{ index $mergedTasks "pre-task-revision" | quote }}
+      value: {{ index .Values.tasks "pre-task-revision" | quote }}
     - name: provision-task-git-url
-      value: {{ index $mergedTasks "provision-task-git-url" | quote }}
+      value: {{ index .Values.tasks "provision-task-git-url" | quote }}
     - name: provision-task-path
-      value: {{ index $mergedTasks "provision-task-path" | quote }}
+      value: {{ index .Values.tasks "provision-task-path" | quote }}
     - name: provision-task-revision
-      value: {{ index $mergedTasks "provision-task-revision" | quote }}
+      value: {{ index .Values.tasks "provision-task-revision" | quote }}
     - name: post-task-git-url
-      value: {{ index $mergedTasks "post-task-git-url" | quote }}
+      value: {{ index .Values.tasks "post-task-git-url" | quote }}
     - name: post-task-path
-      value: {{ index $mergedTasks "post-task-path" | quote }}
+      value: {{ index .Values.tasks "post-task-path" | quote }}
     - name: post-task-revision
-      value: {{ index $mergedTasks "post-task-revision" | quote }}
+      value: {{ index .Values.tasks "post-task-revision" | quote }}
     {{- if hasKey $.Values "run-pre" }}
     - name: run-pre
       value: {{ index $.Values "run-pre" }}
@@ -83,4 +45,3 @@ spec:
     - name: run-post
       value: {{ index $.Values "run-post" }}
     {{- end }}
-{{- end }}

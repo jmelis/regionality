@@ -3,16 +3,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: provisioned-cluster-{{ .Values.CLUSTER_NAME }}
+  name: provisioned-cluster-{{ .Values.region }}-{{ .Values.cluster_name }}
+  labels:
+    cluster: "{{ .Values.cluster_name }}"
+    region: "{{ .Values.region }}"
+    sector: "{{ .Values.sector }}"
 data:
-  CLUSTER_NAME: "{{ .Values.CLUSTER_NAME }}"
-  ACM_VERSION: "{{ .Values.ACM_VERSION }}"
-  KUBERNETES_VERSION: "{{ .Values.KUBERNETES_VERSION }}"
-  PROVISION_APPLICATION_PATH: "{{ .Values.PROVISION_APPLICATION_PATH }}"
-  PROVISION_PATH: "{{ .Values.PROVISION_PATH }}"
-  PROVISION_REPO: "{{ .Values.PROVISION_REPO }}"
-  PROVISION_REVISION: "{{ .Values.PROVISION_REVISION }}"
-  REGION: "{{ .Values.REGION }}"
-  ROLE_ARN: "{{ .Values.ROLE_ARN }}"
-  WORKER_MACHINE_COUNT: "{{ .Values.WORKER_MACHINE_COUNT }}"
-  WORKER_MACHINE_TYPE: "{{ .Values.WORKER_MACHINE_TYPE }}"
+  ACM_VERSION: "{{ .Values.data.ACM_VERSION }}"
+  KUBERNETES_VERSION: "{{ .Values.data.KUBERNETES_VERSION }}"
+  REGION: "{{ .Values.data.REGION }}"
+  ROLE_ARN: "{{ .Values.data.ROLE_ARN }}"
+  WORKER_MACHINE_COUNT: "{{ .Values.data.WORKER_MACHINE_COUNT }}"
+  WORKER_MACHINE_TYPE: "{{ .Values.data.WORKER_MACHINE_TYPE }}"

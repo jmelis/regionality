@@ -1,6 +1,0 @@
-apiVersion: v2
-name: cluster-configs
-description: Generates the cluster configmaps read by the Central Control Plane
-type: application
-version: 0.1.0
-appVersion: "1.16.0"

@@ -18,9 +18,6 @@ spec:
     envFrom:
     - configMapRef:
         name: $(params.configmap)
-    volumeMounts:
-    - name: config-volume
-      mountPath: /etc/config
     script: |
       #!/bin/sh
       set -exvo pipefail
@@ -33,15 +30,9 @@ spec:
       git clone $PROVISION_REPO repo
       (cd repo && git checkout $PROVISION_REVISION)
 
-      # Generate values.yaml from configmap
-      for file in /etc/config/*; do
-        key=$(basename "$file")
-        value=$(cat "$file")
-        echo "$key: $value" >> values.yaml
-      done
-      cat values.yaml
+      TARGET_REVISION=$(cd repo && git rev-parse HEAD)
 
-      helm template repo/$PROVISION_APPLICATION_PATH -f values.yaml | kubectl apply -f -
+      helm template --set clusterName=$CLUSTER_NAME --set region=$REGION --set sector=$SECTOR --set targetRevision=$TARGET_REVISION repo/$PROVISION_APPLICATION_PATH | kubectl apply -f -
 
       # wait for application to be synced
-      kubectl wait application -n argocd $CLUSTER_NAME --for=jsonpath='{.status.sync.status}'=Synced --timeout=300s
+      kubectl wait application -n argocd ${REGION}-${CLUSTER_NAME} --for=jsonpath='{.status.sync.status}'=Synced --timeout=300s

@@ -1,0 +1,27 @@
+cluster_name: cluster-01
+configmap: eu-west-1-cluster-01-config
+data:
+  ACM_VERSION: '2.14'
+  KUBERNETES_VERSION: '1.33'
+  PROVISION_APPLICATION_PATH: providers/aws/provision-application
+  PROVISION_PATH: providers/aws/provision
+  PROVISION_REPO: https://github.com/jmelis/regionality.git
+  PROVISION_REVISION: prerender-configmaps
+  REGION: eu-west-1
+  ROLE_ARN: arn:aws:iam::100000000001:role/central-control-plane
+  TESTVAL: regval
+  WORKER_MACHINE_COUNT: '2'
+  WORKER_MACHINE_TYPE: t4g.medium
+name: cluster-01
+region: eu-west-1
+sector: canary
+tasks:
+  post-task-git-url: https://github.com/jmelis/regionality.git
+  post-task-path: providers/aws/pipeline-tasks/post.yaml
+  post-task-revision: prerender-configmaps
+  pre-task-git-url: https://github.com/jmelis/regionality.git
+  pre-task-path: providers/aws/pipeline-tasks/pre.yaml
+  pre-task-revision: prerender-configmaps
+  provision-task-git-url: https://github.com/jmelis/regionality.git
+  provision-task-path: providers/aws/pipeline-tasks/provision.yaml
+  provision-task-revision: prerender-configmaps

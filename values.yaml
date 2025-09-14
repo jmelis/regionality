@@ -3,86 +3,86 @@ defaults:
   tasks:
     pre-task-git-url: "https://github.com/jmelis/regionality.git"
     pre-task-path: "providers/aws/pipeline-tasks/pre.yaml"
-    pre-task-revision: "HEAD"
+    pre-task-revision: "prerender-configmaps"
     provision-task-git-url: "https://github.com/jmelis/regionality.git"
     provision-task-path: "providers/aws/pipeline-tasks/provision.yaml"
-    provision-task-revision: "HEAD"
+    provision-task-revision: "prerender-configmaps"
     post-task-git-url: "https://github.com/jmelis/regionality.git"
     post-task-path: "providers/aws/pipeline-tasks/post.yaml"
-    post-task-revision: "HEAD"
+    post-task-revision: "prerender-configmaps"
   data:
     PROVISION_REPO: "https://github.com/jmelis/regionality.git"
-    PROVISION_REVISION: "HEAD"
+    PROVISION_REVISION: "prerender-configmaps"
     PROVISION_APPLICATION_PATH: "providers/aws/provision-application"
     PROVISION_PATH: "providers/aws/provision"
     WORKER_MACHINE_TYPE: "m5.xlarge"
 
 # defaults per sector
 sectors:
-  canary:
-    tasks: {}
-    data:
-      KUBERNETES_VERSION: "1.33"
-      WORKER_MACHINE_TYPE: "t4g.medium"
-      WORKER_MACHINE_COUNT: "2"
-      ACM_VERSION: "2.14"
-  prod-01:
-    tasks: {}
-    data:
-      KUBERNETES_VERSION: "1.29"
-      WORKER_MACHINE_COUNT: "6"
-      ACM_VERSION: "2.14"
-  prod-02:
-    tasks: {}
-    data:
-      KUBERNETES_VERSION: "1.29"
-      WORKER_MACHINE_COUNT: "6"
-      ACM_VERSION: "2.13"
+- name: canary
+  tasks: {}
+  data:
+    KUBERNETES_VERSION: "1.33"
+    WORKER_MACHINE_TYPE: "t4g.medium"
+    WORKER_MACHINE_COUNT: "2"
+    ACM_VERSION: "2.14"
+- name: prod-01
+  tasks: {}
+  data:
+    KUBERNETES_VERSION: "1.29"
+    WORKER_MACHINE_COUNT: "6"
+    ACM_VERSION: "2.14"
+- name: prod-02
+  tasks: {}
+  data:
+    KUBERNETES_VERSION: "1.29"
+    WORKER_MACHINE_COUNT: "6"
+    ACM_VERSION: "2.13"
 
 # defaults per region and mapping to sector
 regions:
-  eu-west-1:
-    sector: canary
-    tasks: {}
-    data:
-      REGION: "eu-west-1"
-  us-east-2:
-    sector: prod-01
-    tasks: {}
-    data:
-      REGION: "us-east-2"
-
-  us-west-2:
-    sector: prod-01
-    tasks: {}
-    data:
-      REGION: "us-west-2"
-  us-east-1:
-    sector: prod-02
-    tasks: {}
-    data:
-      REGION: "us-east-1"
+- name: eu-west-1
+  sector: canary
+  tasks: {}
+  data:
+    REGION: "eu-west-1"
+    TESTVAL: "regval"
+- name: us-east-2
+  sector: prod-01
+  tasks: {}
+  data:
+    REGION: "us-east-2"
+- name: us-west-2
+  sector: prod-01
+  tasks: {}
+  data:
+    REGION: "us-west-2"
+- name: us-east-1
+  sector: prod-02
+  tasks: {}
+  data:
+    REGION: "us-east-1"
 
 
 # clusters with their data
 clusters:
-  cluster-01:
-    region: eu-west-1
-    tasks: {}
-    data:
-      ROLE_ARN: "arn:aws:iam::100000000001:role/central-control-plane"
-  cluster-02:
-    region: us-east-2
-    tasks: {}
-    data:
-      ROLE_ARN: "arn:aws:iam::100000000002:role/central-control-plane"
-  cluster-03:
-    region: us-east-1
-    tasks: {}
-    data:
-      ROLE_ARN: "arn:aws:iam::100000000003:role/central-control-plane"
-  cluster-04:
-    region: us-east-1
-    tasks: {}
-    data:
-      ROLE_ARN: "arn:aws:iam::100000000004:role/central-control-plane"
+- name: cluster-01
+  region: eu-west-1
+  tasks: {}
+  data:
+    ROLE_ARN: "arn:aws:iam::100000000001:role/central-control-plane"
+- name: cluster-02
+  region: us-east-2
+  tasks: {}
+  data:
+    ROLE_ARN: "arn:aws:iam::100000000002:role/central-control-plane"
+- name: cluster-03
+  region: us-east-1
+  tasks: {}
+  data:
+    ROLE_ARN: "arn:aws:iam::100000000003:role/central-control-plane"
+- name: cluster-04
+  region: us-east-1
+  tasks: {}
+  data:
+    ROLE_ARN: "arn:aws:iam::100000000004:role/central-control-plane"

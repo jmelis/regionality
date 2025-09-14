@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  ACM_VERSION: '2.14'
+  CLUSTER_NAME: cluster-01
+  KUBERNETES_VERSION: '1.33'
+  PROVISION_APPLICATION_PATH: providers/aws/provision-application
+  PROVISION_PATH: providers/aws/provision
+  PROVISION_REPO: https://github.com/jmelis/regionality.git
+  PROVISION_REVISION: prerender-configmaps
+  REGION: eu-west-1
+  ROLE_ARN: arn:aws:iam::100000000001:role/central-control-plane
+  SECTOR: canary
+  TESTVAL: regval
+  WORKER_MACHINE_COUNT: '2'
+  WORKER_MACHINE_TYPE: t4g.medium
+kind: ConfigMap
+metadata:
+  name: eu-west-1-cluster-01-config
+  namespace: default

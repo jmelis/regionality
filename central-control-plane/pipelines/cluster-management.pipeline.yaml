@@ -75,12 +75,6 @@ spec:
     default: "true"
     description: Whether to run the post-provision task (true/false)
   tasks:
-  - name: load-configmap
-    taskRef:
-      name: load-configmap
-    params:
-    - name: configmap
-      value: $(params.configmap)
   - name: pre-task
     when:
     - input: $(params.run-pre)

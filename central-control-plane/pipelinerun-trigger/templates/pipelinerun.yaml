@@ -12,6 +12,9 @@ metadata:
 spec:
   pipelineRef:
     name: cluster-management
+  workspaces:
+    - name: cluster-config
+      emptyDir: {}
   params:
     - name: configmap
       value: {{ .Values.configmap | quote }}
